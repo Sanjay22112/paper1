@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Exam</title>
+    <style>
+        /* Container styling */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80%;
+            margin: auto;
+        }
+
+        /* Header styling */
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        /* Timer styling */
+        #timer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Question box styling */
+        .left-box {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        /* Options styling */
+        .options label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* Button styling */
+        .buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .buttons button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        #submit {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #submit:hover {
+            background-color: #218838;
+        }
+
+        /* Score and answer container styling */
+        #score-container, #answers-container {
+            margin-top: 20px;
+        }
+
+        #final-score {
+            font-weight: bold;
+        }
+
+        .answer-details {
+            margin-bottom: 20px;
+        }
+
+        .correct-answer, .chosen-answer {
+            font-weight: bold;
+        }
+
+        /* Completion message styling */
+        #completion-message {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        /* Question list styling */
+        #question-list {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .question-link {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            margin: 5px;
+            text-align: center;
+            flex: 1 1 10%;
+        }
+
+        .question-link:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Online Exam</h1>
+        <div id="timer">Time Left: <span id="time">15:00</span></div>
+        <div class="left-box">
+            <div id="question-container"></div>
+            <div class="buttons">
+                <button id="clear-response">Clear Response</button>
+                <button id="previous-question">Previous Question</button>
+                <button id="next-question">Next Question</button>
+                <button id="submit">Submit</button>
+            </div>
+            <div id="completion-message"></div>
+        </div>
+        <div id="score-container" style="display: none;">
+            <p>Marks Obtained: <span id="final-score">0</span>/<span id="total-marks">0</span></p>
+            <button id="retry">Retry</button>
+            <button id="show-answers">Show Answers</button>
+        </div>
+        <div id="answers-container" style="display: none;">
+            <h2>Answers</h2>
+            <div id="answers-list"></div>
+        </div>
+        <div id="question-list">
+            <!-- Buttons for Q1 to Q25 -->
+            <!-- Dynamically generated buttons will go here -->
+        </div>
+    </div>
+    <script>
+        // Questions data
+const questions = [
+    { question: "1. 'लॉटरी रेगुलेशन एक्ट' किस वर्ष पारित किया गया था?", options: ["क) 1999", "ख) 1991", "ग) 1993", "घ) 1998"], answer: "घ" },
+    { question: "2. भारत के राष्ट्रीय चिन्ह को किस दिन अपनाया गया था?", options: ["क) 15 अगस्त 1947", "ख) 26 जनवरी 1950", "ग) 15 अगस्त 1952", "घ) 26 जनवरी 1959"], answer: "ख" },
+    { question: "3. 'रिंग ऑफ फायर' को आप निम्नलिखित में से किस महासागर से सम्बंधित करेंगे?", options: ["क) अटलांटिक", "ख) आर्कटिक", "ग) हिंद", "घ) प्रशांत"], answer: "घ" },
+    { question: "4. रामसर कन्वेंशन के अनुसार, निम्नलिखित में से कौन सा विश्व आर्द्रभूमि दिवस है?", options: ["क) 19 दिसंबर", "ख) 18 मार्च", "ग) 15 जनवरी", "घ) 2 फरवरी"], answer: "घ" },
+    { question: "5. निम्नलिखित में से किस राजपूत शासक ने 1191 ई. में तराइन के प्रथम युद्ध में मुहम्मद गोरी को हराया था?", options: ["क) मालदेव राठौर", "ख) बप्पा रावल", "ग) राणा कुंभा", "घ) पृथ्वीराज चौहान"], answer: "घ" },
+    { question: "6. निकोबार द्वीप समूह की जनजातियां __ के दौरान परिवार के मुखिया की दिवंगत आत्मा को श्रद्धांजलि अर्पित करती हैं।", options: ["क) गंजन महोत्सव (Ganjan Festival)", "ख) जगद्धात्री पूजा (Jagaddhatri Puja)", "ग) कल्पतरु उत्सव (Kalpataru Utsav)", "घ) ऑस्वरी उत्सव (Ossuary Feast)"], answer: "घ" },
+    { question: "7. भारतीय संविधान के निम्नलिखित में से किस संशोधन के द्वारा अनुच्छेद 51-A के तहत एक नया मौलिक कर्तव्य जोड़ा गया?", options: ["क) छियासीवें संशोधन अधिनियम, 2002", "ख) सतासीवें संशोधन अधिनियम, 2003", "ग) पचासीवें संशोधन अधिनियम, 2001", "घ) अट्ठासीवें संशोधन अधिनियम, 2003"], answer: "घ" },
+    { question: "8. निम्नलिखित में से कौन-सा भारत में एक अप्रत्यक्ष कर है?", options: ["क) पूंजी लाभ कर", "ख) वस्तु एवं सेवा कर", "ग) निगम कर", "घ) आयकर"], answer: "ख" },
+    { question: "9. निम्नलिखित में से किस राज्य/केंद्र शासित प्रदेश में मार्च-अप्रैल 2021 के दौरान चुनाव नहीं हुआ था?", options: ["क) पुदुचेरी", "ख) पश्चिम बंगाल", "ग) तमिलनाडु", "घ) बिहार"], answer: "घ" },
+    { question: "10. पृथ्वी पर कार्बन डाइऑक्साइड का कम से कम स्थिरीकरण शैवालों द्वारा प्रकाश संश्लेषण के माध्यम से किया जाता है।", options: ["क) आधा", "ख) एक तिहाई", "ग) दसवां हिस्सा", "घ) एक चौथाई"], answer: "क" },
+    { question: "11. प्रदूषण की कोटि या तीव्रता को कम कर रहा है, या समाप्त कर रहा है।", options: ["क) वतिलयन (Aerosol)", "ख) अवशोषण (Absorption)", "ग) वातन (Aeration)", "घ) उपशमन (Abatement)"], answer: "घ" },
+    { question: "12. पूर्व स्पेनिश फुटबॉलर, एंटोनियो लोपेज हबास, हीरो आईएसएल 2020-21 में निम्नलिखित में से किस फुटबॉल टीम के कोच थे?", options: ["क) केरल ब्लास्टर्स", "ख) एफसी गोवा", "ग) एटीके मोहन बागान", "घ) एससी पूर्वी बंगाल"], answer: "ग" },
+    { question: "13. प्राचीन भारत का एक महत्वपूर्ण बंदरगाह शहर था।", options: ["क) अहिच्छत्र", "ख) चंपा", "ग) ताम्रलिप्त", "घ) श्रावस्ती"], answer: "ग" },
+    { question: "14. केंद्रीय बजट 2021-22 में पिछले वर्ष की तुलना में स्वास्थ्य और कल्याण के लिए आवंटन में __ की वृद्धि की गई थी।", options: ["क) 140%", "ख) 125%", "ग) 137%", "घ) 100%"], answer: "ख" },
+    { question: "15. निम्नलिखित में से किसे 'श्वेत पर्वत (White Mountain)' के नाम से भी जाना जाता है?", options: ["क) चो ओयू (Cho Oyu)", "ख) मकालु (Makalu)", "ग) ल्होत्से (Lhotse)", "घ) धौलागिरी (Dhaulagiri)"], answer: "घ" },
+    { question: "16. ब्रिटिश ईस्ट इंडिया कंपनी ने वर्ष __ में फ्रांसीसियों से पांडिचेरी (पुदुचेरी) को छीन कर उस पर कब्जा कर लिया।", options: ["क) 1699", "ख) 1738", "ग) 1674", "घ) 1761"], answer: "ग" },
+    { question: "17. पौधों का संख्यात्मक वर्गीकरण निम्नलिखित में से किस पर आधारित है?", options: ["क) संरचना", "ख) दिखने योग्य सभी विशेषताओं", "ग) गुणसूत्र संख्या", "घ) रासायनिक घटक"], answer: "ख" },
+    { question: "18. निम्नलिखित में से किस टीम ने इंडियन सुपर लीग 2020-21 जीती थी?", options: ["क) मुंबई सिटी एफसी", "ख) नॉर्थईस्ट यूनाइटेड एफसी", "ग) एटीके मोहन बागान", "घ) केरला ब्लास्टर्स एफसी"], answer: "क" },
+    { question: "19. 'घटम (Ghatam)' एक है।", options: ["क) बड़े आकार वाला, संकीर्ण मुंह का मिट्टी का बर्तन, जिसका उपयोग तबले के रूप में किया जाता है", "ख) हाथ में लेकर बजाया जाने वाला ड्रम जो एक तंबूरे जैसा दिखता है", "ग) लकड़ी और धातु से बना सुषिर वाद्य", "घ) चमड़े और कटहल की लकड़ी से बना तबला"], answer: "क" },
+    { question: "20. निम्नलिखित में से कौन सा/से कथन सही है/हैं?", options: ["क) सकल घरेलू उत्पाद (GDP) का आकलन करते समय केवल विपणन की गई वस्तुओं पर विचार किया जाता है।", "ख) एक महिला द्वारा अपने घर पर किया गया कार्य सकल घरेलू उत्पाद के दायरे से बाहर है।", "ग) सकल घरेलू उत्पाद का अनुमान लगाने में, केवल अंतिम वस्तुओं और सेवाओं पर विचार किया जाता है।", "क) I, II और III"], answer: "क" },
+    { question: "21. निम्नलिखित में से कौन 'द सीक्रेट ऑफ द वेद (The Secret of the Veda)' पुस्तक के लेखक हैं?", options: ["क) जे कृष्णमूर्ति", "ख) स्वामी विवेकानंद", "ग) एनी बेसेंट", "घ) श्री अरबिंदो"], answer: "घ" },
+    { question: "22. निम्नलिखित में से कौन मार्च 2021 में उत्तराखंड के मुख्यमंत्री बने?", options: ["क) बीसी खंडूरी", "ख) मदन कौशिक", "ग) तीरथ सिंह रावत", "घ) धन सिंह रावत"], answer: "ग" },
+    { question: "23. हाइड्रोफाइट्स (hydrophytes) में, पाए जाने वाले विशेषीकृत न्यूमेटोफोर्स __ कहलाते हैं।", options: ["क) मूल", "ख) पुष्प", "ग) बीज", "घ) फल"], answer: "क" },
+    { question: "24. अंतर्राष्ट्रीय मातृ पृथ्वी दिवस, 2021 (Mother Earth Day, 2021) की थीम __ थी।", options: ["क) इंड प्लास्टिक पल्यूशन (End Plastic Pollution)", "ख) प्रोटेक्ट ऑर स्पेसीज़ (Protect our Species)", "ग) क्लाइमेट एक्शन (Climate Action)", "घ) रिस्टोर ऑर अर्थ (Restore our Earth)"], answer: "घ" },
+    { question: "25. निम्नलिखित में से किस दिन को 'विश्व जल दिवस' के रूप में मनाया जाता है?", options: ["क) 29 मार्च", "ख) 5 अप्रैल", "ग) 18 फ़रवरी", "घ) 22 मार्च"], answer: "घ" }
+];
+
+
+
+        let currentQuestionIndex = 0;
+        let selectedAnswers = [];
+
+        function startTimer() {
+            let timeLeft = 15 * 60; // 15 minutes in seconds
+            const timerElement = document.getElementById('time');
+            const intervalId = setInterval(() => {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                timeLeft--;
+
+                if (timeLeft < 0) {
+                    clearInterval(intervalId);
+                    alert("Time's up!");
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function loadQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+
+            currentQuestionIndex = index;
+            const questionContainer = document.getElementById('question-container');
+            questionContainer.innerHTML = '';
+
+            const questionElement = document.createElement('div');
+            questionElement.id = 'question';
+            questionElement.innerHTML = `<strong>${questions[index].question}</strong>`;
+
+            const optionsElement = document.createElement('div');
+            optionsElement.className = 'options';
+
+            questions[index].options.forEach(option => {
+                const label = document.createElement('label');
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'option';
+                input.value = option.charAt(0);
+                if (selectedAnswers[index] === option.charAt(0)) {
+                    input.checked = true;
+                }
+                input.addEventListener('change', () => {
+                    selectedAnswers[currentQuestionIndex] = input.value;
+                });
+                label.appendChild(input);
+                label.appendChild(document.createTextNode(option));
+                optionsElement.appendChild(label);
+            });
+
+            questionElement.appendChild(optionsElement);
+            questionContainer.appendChild(questionElement);
+        }
+
+        function submitExam() {
+            let score = 0;
+
+            questions.forEach((question, index) => {
+                const selectedOption = selectedAnswers[index];
+                if (selectedOption === question.answer) {
+                    score += 2;
+                } else if (selectedOption) {
+                    score -= 0.5;
+                }
+            });
+
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('total-marks').textContent = questions.length * 2;
+
+            document.getElementById('question-list').style.display = 'none';
+            document.getElementById('question-container').style.display = 'none';
+            document.getElementById('timer').style.display = 'none';
+            document.getElementById('score-container').style.display = 'block';
+            document.getElementById('completion-message').textContent = "Thanks for submitting!";
+            document.getElementById('completion-message').style.display = 'block';
+        }
+
+        document.getElementById('retry').addEventListener('click', () => {
+            selectedAnswers = [];
+            document.getElementById('score-container').style.display = 'none';
+            document.getElementById('answers-container').style.display = 'none';
+            document.getElementById('completion-message').style.display = 'none';
+            document.getElementById('timer').style.display = 'block';
+            document.getElementById('question-list').style.display = 'flex';
+            document.getElementById('question-container').style.display = 'block';
+            loadQuestion(0);
+        });
+
+        document.getElementById('show-answers').addEventListener('click', () => {
+            const answersList = document.getElementById('answers-list');
+            answersList.innerHTML = ''; // Clear existing answers
+
+            questions.forEach((question, index) => {
+                const answerElement = document.createElement('div');
+                answerElement.className = 'answer-details';
+
+                // Display the question text
+                const questionText = document.createElement('div');
+                questionText.innerHTML = `<strong>${question.question}</strong>`;
+                answerElement.appendChild(questionText);
+
+                // Display all options for the question
+                const optionsList = document.createElement('ul');
+                optionsList.className = 'options-list';
+                question.options.forEach(option => {
+                    const optionItem = document.createElement('li');
+                    optionItem.textContent = option;
+                    optionsList.appendChild(optionItem);
+                });
+                answerElement.appendChild(optionsList);
+
+                // Display the chosen answer
+                const chosenAnswer = selectedAnswers[index];
+                const chosenAnswerText = document.createElement('div');
+                chosenAnswerText.innerHTML = `Your answer: <span class="chosen-answer">${chosenAnswer ? chosenAnswer : 'Not Answered'}</span>`;
+                answerElement.appendChild(chosenAnswerText);
+
+                // Display the correct answer
+                const correctAnswerText = document.createElement('div');
+                correctAnswerText.innerHTML = `Correct answer: <span class="correct-answer">${question.answer}</span>`;
+                answerElement.appendChild(correctAnswerText);
+
+                                // Append the answer details to the answers list
+                answersList.appendChild(answerElement);
+            });
+
+            document.getElementById('score-container').style.display = 'none';
+            document.getElementById('answers-container').style.display = 'block';
+        });
+
+        document.getElementById('clear-response').addEventListener('click', () => {
+            selectedAnswers[currentQuestionIndex] = undefined;
+            loadQuestion(currentQuestionIndex);
+        });
+
+        document.getElementById('previous-question').addEventListener('click', () => {
+            loadQuestion(currentQuestionIndex - 1);
+        });
+
+        document.getElementById('next-question').addEventListener('click', () => {
+            loadQuestion(currentQuestionIndex + 1);
+        });
+
+        document.getElementById('submit').addEventListener('click', () => {
+            if (confirm("Are you sure you want to submit?")) {
+                submitExam();
+            }
+        });
+
+        function createQuestionButtons() {
+            const questionList = document.getElementById('question-list');
+            questionList.innerHTML = ''; // Clear existing buttons
+
+            for (let i = 1; i <= 25; i++) {
+                const button = document.createElement('button');
+                button.className = 'question-link';
+                button.textContent = `Q${i}`;
+                button.addEventListener('click', () => {
+                    loadQuestion(i - 1);
+                });
+                questionList.appendChild(button);
+            }
+        }
+
+        window.onload = () => {
+            createQuestionButtons();
+            startTimer();
+            loadQuestion(0);
+        };
+
+        // Disable right-click
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // Disable text selection and copying
+        document.addEventListener('selectstart', event => event.preventDefault());
+        document.addEventListener('copy', event => event.preventDefault());
+    </script>
+</body>
+</html>
+
